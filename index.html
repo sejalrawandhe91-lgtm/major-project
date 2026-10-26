@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>National Land Acquisition & Management System (NLAMS)</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans">
+
+    <!-- Header / Navigation -->
+    <header class="bg-slate-800 border-b border-slate-700 shadow-xl sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-4 flex flex-col lg:flex-row items-center justify-between">
+            <div class="flex items-center space-x-3 mb-4 lg:mb-0">
+                <div class="bg-emerald-600 text-white p-2.5 rounded-lg shadow-md font-bold text-xl">
+                    <i class="fa-solid fa-map-location-dot"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-black tracking-wider text-white flex items-center">
+                        NLAMS PROTOTYPE
+                        <span class="ml-2.5 text-xs bg-emerald-500/20 text-emerald-400 font-bold px-2 py-0.5 rounded border border-emerald-500/30">ID: 26016</span>
+                    </h1>
+                    <p class="text-xs text-slate-400 font-medium">Ministry of Rural Development | Dept of Land Resources (DoLR)</p>
+                </div>
+            </div>
+            
+            <nav class="flex flex-wrap gap-1 bg-slate-950/40 p-1.5 rounded-xl border border-slate-700">
+                <button onclick="switchTab('dashboard')" id="btn-dashboard" class="tab-btn px-4 py-2 text-sm font-semibold rounded-lg transition-all bg-emerald-600 text-white shadow-md">
+                    <i class="fa-solid fa-gauge mr-2"></i>Overview
+                </button>
+                <button onclick="switchTab('projects')" id="btn-projects" class="tab-btn px-4 py-2 text-sm font-semibold rounded-lg text-slate-400 hover:text-white transition-all">
+                    <i class="fa-solid fa-folder-tree mr-2"></i>Projects & Parcels
+                </button>
+                <button onclick="switchTab('calculator')" id="btn-calculator" class="tab-btn px-4 py-2 text-sm font-semibold rounded-lg text-slate-400 hover:text-white transition-all">
+                    <i class="fa-solid fa-calculator mr-2"></i>RFCTLARR Calculator
+                </button>
+                <button onclick="switchTab('disputes')" id="btn-disputes" class="tab-btn px-4 py-2 text-sm font-semibold rounded-lg text-slate-400 hover:text-white transition-all">
+                    <i class="fa-solid fa-scale-balanced mr-2"></i>Disputes Portal
+                    <span id="dispute-badge" class="ml-1.5 hidden bg-rose-600 text-white text-xxs font-black px-1.5 py-0.5 rounded-full">0</span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-grow container mx-auto px-6 py-8">
+        
+        <!-- ================= TAB: OVERVIEW DASHBOARD ================= -->
+        <section id="tab-dashboard" class="tab-content space-y-8">
+            <!-- Financial Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Card 1 -->
+                <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-md flex items-center justify-between">
+                    <div>
+                        <p class="text-xs text-slate-400 uppercase font-bold tracking-wider">Total Compensation</p>
+                        <h3 id="financial-total" class="text-2xl font-black text-white mt-1">₹0.00</h3>
+                        <p class="text-xxs text-slate-500 mt-1">Acquisition value allocated</p>
+                    </div>
+                    <div class="bg-blue-600/10 text-blue-400 p-3.5 rounded-xl"><i class="fa-solid fa-wallet text-2xl"></i></div>
+                </div>
+                <!-- Card 2 -->
+                <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-md flex items-center justify-between">
+                    <div>
+                        <p class="text-xs text-slate-400 uppercase font-bold tracking-wider">Disbursed (Paid)</p>
+                        <h3 id="financial-disbursed" class="text-2xl font-black text-emerald-400 mt-1">₹0.00</h3>
+                        <p id="financial-disbursed-pct" class="text-xxs text-emerald-500 mt-1">0% completed</p>
+                    </div>
+                    <div class="bg-emerald-600/10 text-emerald-400 p-3.5 rounded-xl"><i class="fa-solid fa-circle-check text-2xl"></i></div>
+                </div>
+                <!-- Card 3 -->
+                <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-md flex items-center justify-between">
+                    <div>
+                        <p class="text-xs text-slate-400 uppercase font-bold tracking-wider">Disputed Amount</p>
+                        <h3 id="financial-disputed" class="text-2xl font-black text-rose-400 mt-1">₹0.00</h3>
+                        <p class="text-xxs text-rose-500 mt-1">Locked in arbitration</p>
+                    </div>
+                    <div class="bg-rose-600/10 text-rose-400 p-3.5 rounded-xl"><i class="fa-solid fa-scale-unbalanced-flip text-2xl"></i></div>
+                </div>
+                <!-- Card 4 -->
+                <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-md flex items-center justify-between">
+                    <div>
+                        <p class="text-xs text-slate-400 uppercase font-bold tracking-wider">Pending Release</p>
+                        <h3 id="financial-pending" class="text-2xl font-black text-yellow-400 mt-1">₹0.00</h3>
+                        <p class="text-xxs text-yellow-500 mt-1">Awaiting validation</p>
+                    </div>
+                    <div class="bg-yellow-600/10 text-yellow-400 p-3.5 rounded-xl"><i class="fa-solid fa-hourglass-half text-2xl"></i></div>
+                </div>
+            </div>
+
+            <!-- Visual Analytics Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Doughnut Status Chart -->
+                <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-md flex flex-col justify-between">
+                    <h4 class="text-sm font-bold text-white mb-4"><i class="fa-solid fa-chart-pie mr-2 text-emerald-500"></i>Land Parcel Status Overview</h4>
+                    <div class="h-[250px] relative flex items-center justify-center">
+                        <canvas id="chart-status"></canvas>
+                    </div>
+                    <div class="text-center text-xs text-slate-400 mt-4">
+                        Acquisitions completed: <span id="dashboard-progress-txt" class="font-bold text-white">0%</span>
+                    </div>
+                </div>
+                
+                <!-- Project progress summary -->
+                <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-md lg:col-span-2 flex flex-col justify-between">
+                    <h4 class="text-sm font-bold text-white mb-4"><i class="fa-solid fa-chart-bar mr-2 text-emerald-500"></i>Project Progress (Acres Acquired vs Target)</h4>
+                    <div class="h-[250px]">
+                        <canvas id="chart-projects"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Project Pipelines Card List -->
+            <div>
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-lg font-bold text-white flex items-center"><i class="fa-solid fa-list-ul text-emerald-500 mr-2"></i>Active Infrastructure Projects</h3>
+                    <button onclick="openNewProjectModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-2 rounded-lg transition-colors flex items-center">
+                        <i class="fa-solid fa-plus mr-1.5"></i>Create Project
+                    </button>
+                </div>
+                
+                <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Loaded dynamically -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB: PROJECTS & PARCELS ================= -->
+        <section id="tab-projects" class="tab-content hidden space-y-8">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <!-- Left panel: Project Selector and adding parcel -->
+                <div class="lg:col-span-4 space-y-6">
+                    <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-md">
+                        <label class="block text-sm font-bold text-slate-400 mb-2">Select Active Project</label>
+                        <select id="project-selector" onchange="loadProjectParcels(this.value)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors font-semibold">
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+
+                    <!-- Add Parcel Form -->
+                    <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-md">
+                        <h4 class="text-md font-bold text-white mb-4 flex items-center">
+                            <i class="fa-solid fa-circle-plus text-emerald-500 mr-2"></i>Add Land Parcel
+                        </h4>
+                        
+                        <form id="parcel-form" onsubmit="handleCreateParcel(event)" class="space-y-4 text-sm">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-400 mb-1">Landowner Name</label>
+                                <input type="text" id="par-owner" required placeholder="e.g. Ramesh Chandra" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500">
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-400 mb-1">Survey No.</label>
+                                    <input type="text" id="par-survey" required placeholder="e.g. 402/3" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-400 mb-1">Land Type</label>
+                                    <select id="par-type" onchange="runAutoValuation()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500">
+                                        <option value="Agricultural">Agricultural</option>
+                                        <option value="Residential">Residential</option>
+                                        <option value="Commercial">Commercial</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-400 mb-1">Area (Acres)</label>
+                                    <input type="number" id="par-area" step="0.01" required value="2.5" oninput="runAutoValuation()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-400 mb-1">Circle Rate (₹/Acre)</label>
+                                    <input type="number" id="par-rate" required value="2500000" oninput="runAutoValuation()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-400 mb-1">Multiplier Factor</label>
+                                    <input type="number" id="par-multiplier" step="0.1" required value="2.0" oninput="runAutoValuation()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-400 mb-1">Asset Value (₹)</label>
+                                    <input type="number" id="par-assets" value="120000" oninput="runAutoValuation()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500">
+                                </div>
+                            </div>
+
+                            <!-- Live Legal Valuation Readout -->
+                            <div class="bg-emerald-950/20 border border-emerald-500/20 p-3 rounded-lg text-xs space-y-1">
+                                <div class="flex justify-between text-slate-400"><span>Market Value:</span> <span id="readout-mv">₹0.00</span></div>
+                                <div class="flex justify-between text-slate-400"><span>Solatium (100%):</span> <span id="readout-sol">₹0.00</span></div>
+                                <div class="flex justify-between font-bold text-emerald-400 mt-1 border-t border-emerald-500/10 pt-1">
+                                    <span>Total Compensation:</span> <span id="readout-total">₹0.00</span>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-lg shadow transition-colors flex items-center justify-center">
+                                <i class="fa-solid fa-plus mr-2"></i>Add Landowner Record
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Right panel: Land parcels table list -->
+                <div class="lg:col-span-8 bg-slate-800 rounded-2xl border border-slate-700 shadow-md flex flex-col justify-between overflow-hidden">
+                    <div>
+                        <div class="px-6 py-4 border-b border-slate-700 flex flex-col md:flex-row items-center justify-between gap-4">
+                            <div>
+                                <h3 id="active-project-name" class="text-md font-bold text-white">-</h3>
+                                <p id="active-project-meta" class="text-xs text-slate-400 mt-0.5">Project details & land parcels</p>
+                            </div>
+                            <!-- Search Bar -->
+                            <div class="relative w-full md:w-64">
+                                <input type="text" id="parcel-search-input" onkeyup="filterParcelsTable()" placeholder="Search owner or survey..." class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-9 pr-4 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500">
+                                <span class="absolute left-3 top-2 text-slate-500 text-xs"><i class="fa-solid fa-magnifying-glass"></i></span>
+                            </div>
+                        </div>
+
+                        <div class="overflow-x-auto max-h-[550px]">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="bg-slate-900/40 text-slate-400 uppercase font-bold border-b border-slate-700">
+                                        <th class="px-6 py-3">Survey</th>
+                                        <th class="px-6 py-3">Landowner</th>
+                                        <th class="px-6 py-3">Area (Ac)</th>
+                                        <th class="px-6 py-3">Type</th>
+                                        <th class="px-6 py-3 text-right">Compensation</th>
+                                        <th class="px-6 py-3 text-center">Status</th>
+                                        <th class="px-6 py-3 text-center">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="parcels-table-body" class="divide-y divide-slate-700 text-slate-300">
+                                    <!-- Populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB: RFCTLARR CALCULATOR ================= -->
+        <section id="tab-calculator" class="tab-content hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <!-- Calculator Inputs -->
+                <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-md lg:col-span-5 space-y-6">
+                    <div>
+                        <h3 class="text-lg font-bold text-white mb-2"><i class="fa-solid fa-calculator mr-2 text-emerald-500"></i>Compensation Calculator</h3>
+                        <p class="text-xs text-slate-400">
+                            Simulate legal compensation values based on the Right to Fair Compensation and Transparency in Land Acquisition Act (RFCTLARR, 2013).
+                        </p>
+                    </div>
+
+                    <div class="space-y-4 text-sm">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1">Land Area (Acres)</label>
+                            <input type="number" id="calc-area" value="5.0" step="0.01" oninput="runCalculator()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1">Circle Rate / Market Rate (₹ / Acre)</label>
+                            <input type="number" id="calc-rate" value="3500000" step="50000" oninput="runCalculator()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1">Multiplier Factor (Rural: 1.5 to 2.0 | Urban: 1.0)</label>
+                            <select id="calc-multiplier" onchange="runCalculator()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500">
+                                <option value="1.0">1.0 (Urban - Multiplier)</option>
+                                <option value="1.3">1.3 (Semi-Urban Multiplier)</option>
+                                <option value="1.5">1.5 (Rural Area Multiplier)</option>
+                                <option value="2.0" selected>2.0 (Deep Rural Area Multiplier)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1">Valuation of Assets/Structures/Trees (₹)</label>
+                            <input type="number" id="calc-assets" value="250000" step="10000" oninput="runCalculator()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Calculator Breakdown Output -->
+                <div class="lg:col-span-7 bg-slate-800 p-8 rounded-2xl border border-slate-700 shadow-md flex flex-col justify-between">
+                    <div>
+                        <h4 class="text-sm font-bold text-white mb-6 uppercase tracking-wider border-b border-slate-700 pb-2"><i class="fa-solid fa-list-check mr-2 text-emerald-500"></i>Legal Formula Cost Breakdown</h4>
+                        
+                        <div class="space-y-4 text-sm">
+                            <div class="flex justify-between border-b border-slate-700/50 pb-2">
+                                <div>
+                                    <p class="font-semibold text-white">Basic Market Value (A)</p>
+                                    <p class="text-xxs text-slate-400">Area × Circle Rate</p>
+                                </div>
+                                <span id="breakdown-bmv" class="font-bold text-white">₹0.00</span>
+                            </div>
+
+                            <div class="flex justify-between border-b border-slate-700/50 pb-2">
+                                <div>
+                                    <p class="font-semibold text-white">Multiplied Market Value (B)</p>
+                                    <p class="text-xxs text-slate-400">Basic Market Value × Multiplier</p>
+                                </div>
+                                <span id="breakdown-mmv" class="font-bold text-white">₹0.00</span>
+                            </div>
+
+                            <div class="flex justify-between border-b border-slate-700/50 pb-2">
+                                <div>
+                                    <p class="font-semibold text-white">Solatium (C)</p>
+                                    <p class="text-xxs text-slate-400">100% mandatory solatium of (B)</p>
+                                </div>
+                                <span id="breakdown-sol" class="font-bold text-white">₹0.00</span>
+                            </div>
+
+                            <div class="flex justify-between border-b border-slate-700/50 pb-2">
+                                <div>
+                                    <p class="font-semibold text-white">Assets and Structures (D)</p>
+                                    <p class="text-xxs text-slate-400">Values of trees, crops, houses, wells</p>
+                                </div>
+                                <span id="breakdown-assets" class="font-bold text-white">₹0.00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900 border border-emerald-500/20 p-6 rounded-2xl mt-8 text-center space-y-2">
+                        <span class="text-xs text-slate-400 uppercase font-bold tracking-widest">Total Compensation (B + C + D)</span>
+                        <h2 id="calc-final-result" class="text-3xl md:text-4xl font-black text-emerald-400">₹0.00</h2>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB: DISPUTES PORTAL ================= -->
+        <section id="tab-disputes" class="tab-content hidden space-y-8">
+            <!-- Active Disputes -->
+            <div class="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden shadow-md">
+                <div class="px-6 py-4 border-b border-slate-700 flex justify-between items-center">
+                    <h3 class="text-md font-bold text-white"><i class="fa-solid fa-gavel mr-2 text-rose-500"></i>Active Disputes Registry</h3>
+                    <span class="text-xs text-slate-400">Real-time court & administrative objections list</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-slate-900/40 text-slate-400 uppercase font-bold border-b border-slate-700">
+                                <th class="px-6 py-3">Dispute ID</th>
+                                <th class="px-6 py-3">Project</th>
+                                <th class="px-6 py-3">Survey</th>
+                                <th class="px-6 py-3">Disputed Owner</th>
+                                <th class="px-6 py-3">Objection Type</th>
+                                <th class="px-6 py-3">Description</th>
+                                <th class="px-6 py-3 text-center">Status</th>
+                                <th class="px-6 py-3 text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="disputes-table-body" class="divide-y divide-slate-700 text-slate-300">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- NEW PROJECT MODAL -->
+    <div id="new-project-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+        <div class="bg-slate-800 w-full max-w-md p-6 rounded-2xl border border-slate-700 shadow-2xl relative">
+            <button onclick="closeNewProjectModal()" class="absolute right-4 top-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            
+            <h3 class="text-lg font-bold text-white mb-6 flex items-center"><i class="fa-solid fa-plus-minus text-emerald-500 mr-2"></i>Create New Project</h3>
+            
+            <form onsubmit="handleCreateProject(event)" class="space-y-4 text-sm">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">Project Name</label>
+                    <input type="text" id="new-proj-name" required placeholder="e.g. NH-48 Expansion Highway" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-white focus:outline-none focus:border-emerald-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">Requiring Authority</label>
+                    <input type="text" id="new-proj-agency" required placeholder="e.g. NHAI, Ministry of Railways" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-white focus:outline-none focus:border-emerald-500">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">State</label>
+                        <input type="text" id="new-proj-state" required placeholder="e.g. Madhya Pradesh" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-white focus:outline-none focus:border-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Budget Allocated (₹ Cr)</label>
+                        <input type="number" id="new-proj-budget" step="0.1" required placeholder="e.g. 150.0" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-white focus:outline-none focus:border-emerald-500">
+                    </div>
+                </div>
+
+                <div class="pt-4">
+                    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-lg shadow-md transition-colors">
+                        Create Project Pipeline
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- RESOLVE DISPUTE MODAL -->
+    <div id="resolve-dispute-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+        <div class="bg-slate-800 w-full max-w-md p-6 rounded-2xl border border-slate-700 shadow-2xl relative">
+            <button onclick="closeResolveDisputeModal()" class="absolute right-4 top-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            
+            <h3 class="text-lg font-bold text-white mb-6 flex items-center"><i class="fa-solid fa-gavel text-rose-500 mr-2"></i>Resolve Dispute</h3>
+            
+            <form onsubmit="handleResolveDispute(event)" class="space-y-4 text-sm">
+                <input type="hidden" id="resolve-dispute-id">
+                
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">Resolution Details & Mediation Minutes</label>
+                    <textarea id="resolve-details" required rows="4" placeholder="Describe the mediation settlement, court order details, or measurements compromise agreed..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500"></textarea>
+                </div>
+
+                <div class="pt-4">
+                    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-lg shadow-md transition-colors">
+                        Resolve & Re-file for Payment
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- RAISE DISPUTE MODAL -->
+    <div id="raise-dispute-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+        <div class="bg-slate-800 w-full max-w-md p-6 rounded-2xl border border-slate-700 shadow-2xl relative">
+            <button onclick="closeRaiseDisputeModal()" class="absolute right-4 top-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            
+            <h3 class="text-lg font-bold text-white mb-6 flex items-center"><i class="fa-solid fa-scale-unbalanced text-rose-500 mr-2"></i>File Court / Survey Dispute</h3>
+            
+            <form onsubmit="handleRaiseDispute(event)" class="space-y-4 text-sm">
+                <input type="hidden" id="dispute-parcel-id">
+                
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">Objection / Dispute Type</label>
+                    <select id="dispute-type" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-white focus:outline-none focus:border-emerald-500">
+                        <option value="Compensation Amount">Objection to Compensation Amount</option>
+                        <option value="Ownership Title">Ownership Title / Legal Heir Dispute</option>
+                        <option value="Measurement Border">Boundary Survey / Area Discrepancy</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">Detailed Description of objection</label>
+                    <textarea id="dispute-description" required rows="4" placeholder="Describe the dispute grounds, land registration document mismatch, or survey details..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500"></textarea>
+                </div>
+
+                <div class="pt-4">
+                    <button type="submit" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 rounded-lg shadow-md transition-colors">
+                        Log Dispute & Block Disbursement
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-slate-800 border-t border-slate-700 py-6 mt-12 text-center text-xs text-slate-500">
+        <div class="container mx-auto px-6">
+            <p>National Land Acquisition & Management System (NLAMS) - Real-Time Dashboard Prototype.</p>
+            <p class="mt-1">Developed for Ministry of Rural Development, Dept of Land Resources (DoLR).</p>
+        </div>
+    </footer>
+
+    <!-- App Logic -->
+    <script>
+        let statusChart = null;
+        let projectsChart = null;
+        let allProjects = [];
+        let activeProjectParcels = [];
+
+        // Formatting Helpers
+        function formatRupees(val) {
+            return new Intl.NumberFormat('en-IN', {
+                style: 'currency',
+                currency: 'INR',
+                maximumFractionDigits: 0
+            }).format(val);
+        }
+
+        // Switch Tabs
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-emerald-600', 'text-white', 'shadow-md');
+                btn.classList.add('text-slate-400', 'hover:text-white');
+            });
+
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`btn-${tabId}`);
+            activeBtn.classList.remove('text-slate-400', 'hover:text-white');
+            activeBtn.classList.add('bg-emerald-600', 'text-white', 'shadow-md');
+
+            if (tabId === 'dashboard') {
+                loadDashboardStats();
+            } else if (tabId === 'projects') {
+                loadProjectsDropdown();
+            } else if (tabId === 'disputes') {
+                loadDisputesList();
+            } else if (tabId === 'calculator') {
+                runCalculator();
+            }
+        }
+
+        // On Load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadDashboardStats();
+            runAutoValuation();
+            // Poll for fresh stats
+            setInterval(loadDashboardStats, 30000);
+        });
+
+        // Load Dashboard Stats & Render Charts
+        function loadDashboardStats() {
+            fetch('/api/dashboard/stats')
+                .then(res => res.json())
+                .then(data => {
+                    // Update Financials
+                    document.getElementById('financial-total').innerText = formatRupees(data.financials.total_compensation);
+                    document.getElementById('financial-disbursed').innerText = formatRupees(data.financials.total_disbursed);
+                    document.getElementById('financial-disputed').innerText = formatRupees(data.financials.total_disputed_amt);
+                    document.getElementById('financial-pending').innerText = formatRupees(data.financials.total_pending);
+
+                    // Disbursement Percentage
+                    const disbursedPct = data.financials.total_compensation > 0 
+                        ? (data.financials.total_disbursed / data.financials.total_compensation * 100).toFixed(1)
+                        : 0.0;
+                    document.getElementById('financial-disbursed-pct').innerText = `${disbursedPct}% disbursed`;
+
+                    // Updates dispute badge
+                    const badge = document.getElementById('dispute-badge');
+                    if (data.active_disputes > 0) {
+                        badge.innerText = data.active_disputes;
+                        badge.classList.remove('hidden');
+                    } else {
+                        badge.classList.add('hidden');
+                    }
+
+                    // Progress text
+                    document.getElementById('dashboard-progress-txt').innerText = `${data.progress_percentage}%`;
+
+                    // Render charts
+                    renderStatusChart(data.status_breakdown);
+                    renderProjectsChart(data.projects);
+
+                    // Render Project Cards
+                    renderProjectCards(data.projects);
+                });
+        }
+
+        // Render Status Doughnut Chart
+        function renderStatusChart(statusMap) {
+            const ctx = document.getElementById('chart-status').getContext('2d');
+            
+            const labels = Object.keys(statusMap);
+            const counts = Object.values(statusMap);
+            
+            if (statusChart) statusChart.destroy();
+            
+            statusChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: counts,
+                        backgroundColor: ['#eab308', '#3b82f6', '#8b5cf6', '#10b981', '#f43f5e'],
+                        borderWidth: 1,
+                        borderColor: '#1e293b'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#94a3b8', font: { size: 10 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Render Horizontal Bar Chart for Project Acres Acquired vs Target
+        function renderProjectsChart(projects) {
+            const ctx = document.getElementById('chart-projects').getContext('2d');
+            
+            const labels = projects.map(p => p.name);
+            const targetAcres = projects.map(p => p.target_acres);
+            const acquiredAcres = projects.map(p => p.acquired_acres);
+            
+            if (projectsChart) projectsChart.destroy();
+            
+            projectsChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Acres Acquired',
+                            data: acquiredAcres,
+                            backgroundColor: '#10b981',
+                            borderRadius: 4
+                        },
+                        {
+                            label: 'Target Acres',
+                            data: targetAcres,
+                            backgroundColor: '#475569',
+                            borderRadius: 4
+                        }
+                    ]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { grid: { color: 'rgba(71, 85, 105, 0.2)' }, ticks: { color: '#94a3b8' } },
+                        y: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 9 } } }
+                    },
+                    plugins: {
+                        legend: { labels: { color: '#94a3b8' } }
+                    }
+                }
+            });
+        }
+
+        // Render Active Projects as Cards
+        function renderProjectCards(projects) {
+            const container = document.getElementById('projects-grid');
+            container.innerHTML = '';
+            
+            projects.forEach(p => {
+                const card = document.createElement('div');
+                card.className = "bg-slate-800 rounded-2xl border border-slate-700 p-5 space-y-4 shadow-lg hover:border-slate-600 transition-colors flex flex-col justify-between";
+                
+                let statusBadge = "bg-blue-600/20 text-blue-400 border-blue-600/30";
+                if (p.status === "Completed") statusBadge = "bg-emerald-600/20 text-emerald-400 border-emerald-600/30";
+                if (p.status === "Disbursement") statusBadge = "bg-yellow-600/20 text-yellow-400 border-yellow-600/30";
+                if (p.status === "Surveying") statusBadge = "bg-slate-700 text-slate-300 border-slate-600";
+                
+                card.innerHTML = `
+                    <div class="space-y-1">
+                        <div class="flex justify-between items-start gap-2">
+                            <span class="text-xxs px-2 py-0.5 rounded-full font-bold border ${statusBadge}">${p.status}</span>
+                            <span class="text-xxs text-slate-400 font-semibold uppercase">${p.requiring_agency}</span>
+                        </div>
+                        <h4 class="text-sm font-bold text-white pt-1 line-clamp-1">${p.name}</h4>
+                        <p class="text-xxs text-slate-400"><i class="fa-solid fa-location-dot mr-1"></i>${p.state}</p>
+                    </div>
+
+                    <div class="space-y-1.5 pt-2">
+                        <div class="flex justify-between text-xxs font-medium text-slate-400">
+                            <span>Acquired Land Progress:</span>
+                            <span class="text-white font-bold">${p.acquired_acres} / ${p.target_acres} Acres (${p.progress_percentage}%)</span>
+                        </div>
+                        <div class="w-full bg-slate-900 rounded-full h-1.5 overflow-hidden">
+                            <div class="bg-emerald-500 h-1.5 rounded-full" style="width: ${p.progress_percentage}%"></div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-center pt-3 border-t border-slate-700/50 mt-2">
+                        <div>
+                            <p class="text-xxs text-slate-400">Allocated Budget</p>
+                            <p class="text-xs font-black text-white">₹${p.budget_cr} Crores</p>
+                        </div>
+                        <button onclick="viewProjectDetails(${p.id})" class="bg-slate-700 hover:bg-emerald-600 hover:text-white text-slate-300 text-xxs font-bold px-3 py-1.5 rounded-lg transition-colors">
+                            Manage Parcels
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // View project details (Redirects to project tab and selects project)
+        function viewProjectDetails(projectId) {
+            switchTab('projects');
+            // Wait for dropdown load
+            setTimeout(() => {
+                const selector = document.getElementById('project-selector');
+                selector.value = projectId;
+                loadProjectParcels(projectId);
+            }, 100);
+        }
+
+        // Load project selector dropdown in Projects tab
+        function loadProjectsDropdown() {
+            fetch('/api/projects')
+                .then(res => res.json())
+                .then(projects => {
+                    allProjects = projects;
+                    const selector = document.getElementById('project-selector');
+                    selector.innerHTML = '';
+                    
+                    if (projects.length === 0) {
+                        const opt = document.createElement('option');
+                        opt.innerText = "No projects found";
+                        selector.appendChild(opt);
+                        return;
+                    }
+
+                    projects.forEach(p => {
+                        const opt = document.createElement('option');
+                        opt.value = p.id;
+                        opt.innerText = `${p.name} (${p.requiring_agency})`;
+                        selector.appendChild(opt);
+                    });
+
+                    // Load parcels of the first project
+                    loadProjectParcels(projects[0].id);
+                });
+        }
+
+        // Load Land Parcels for Selected Project
+        function loadProjectParcels(projectId) {
+            fetch(`/api/projects/${projectId}/parcels`)
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('active-project-name').innerText = data.project.name;
+                    document.getElementById('active-project-meta').innerText = `Agency: ${data.project.requiring_agency} | Budget Allocated: ₹${data.project.budget_cr} Cr | Target Acres: ${data.project.target_acres} Ac`;
+                    
+                    activeProjectParcels = data.parcels;
+                    populateParcelsTable(data.parcels);
+                });
+        }
+
+        // Populate Land Parcels Table
+        function populateParcelsTable(parcels) {
+            const tbody = document.getElementById('parcels-table-body');
+            tbody.innerHTML = '';
+
+            if (parcels.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="px-6 py-12 text-center text-slate-500 italic">No land parcels logged for this project yet. Add landowners on the left panel!</td>
+                    </tr>
+                `;
+                return;
+            }
+
+            parcels.forEach(p => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-700/35 border-b border-slate-700/60";
+
+                // Status Badge Color
+                let statusBadge = "bg-slate-700/40 text-slate-400 border-slate-600";
+                if (p.status === "Paid") statusBadge = "bg-emerald-500/10 text-emerald-400 border-emerald-500/25";
+                if (p.status === "Valued") statusBadge = "bg-purple-500/10 text-purple-400 border-purple-500/25";
+                if (p.status === "Notified") statusBadge = "bg-blue-500/10 text-blue-400 border-blue-500/25";
+                if (p.status === "Disputed") statusBadge = "bg-rose-500/10 text-rose-400 border-rose-500/25";
+
+                // Actions Setup
+                let actions = '';
+                if (p.status === 'Valued' || p.status === 'Notified') {
+                    actions = `
+                        <div class="flex justify-center space-x-1.5">
+                            <button onclick="disbursePayment(${p.id})" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xxs font-bold px-2 py-1 rounded transition-colors">Disburse</button>
+                            <button onclick="openRaiseDisputeModal(${p.id})" class="bg-rose-600/20 hover:bg-rose-600 text-rose-400 hover:text-white text-xxs font-bold px-2 py-1 rounded transition-colors">Objection</button>
+                        </div>
+                    `;
+                } else if (p.status === 'Paid') {
+                    actions = `<span class="text-xxs text-slate-500 italic">Paid on ${new Date(p.disbursement_date).toLocaleDateString()}</span>`;
+                } else if (p.status === 'Disputed') {
+                    actions = `<span class="text-xxs text-rose-500 font-bold italic"><i class="fa-solid fa-gavel mr-1"></i>In Arbitration</span>`;
+                } else {
+                    actions = `<span class="text-xxs text-slate-500 italic">Awaiting Valuation</span>`;
+                }
+
+                tr.innerHTML = `
+                    <td class="px-6 py-4 font-mono font-semibold">${p.survey_number}</td>
+                    <td class="px-6 py-4 font-bold text-white">${p.owner_name}</td>
+                    <td class="px-6 py-4 font-semibold">${p.area_acres}</td>
+                    <td class="px-6 py-4 text-slate-400">${p.land_type}</td>
+                    <td class="px-6 py-4 text-right font-bold text-emerald-400 font-mono">${formatRupees(p.total_compensation)}</td>
+                    <td class="px-6 py-4 text-center">
+                        <span class="text-xxs border px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${statusBadge}">${p.status}</span>
+                    </td>
+                    <td class="px-6 py-4 text-center">${actions}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Live Valuation Calculators inside Form
+        function runAutoValuation() {
+            const area = parseFloat(document.getElementById('par-area').value) || 0.0;
+            const rate = parseFloat(document.getElementById('par-rate').value) || 0.0;
+            const mult = parseFloat(document.getElementById('par-multiplier').value) || 1.0;
+            const assets = parseFloat(document.getElementById('par-assets').value) || 0.0;
+
+            const mv = area * rate;
+            const solatium = mv * mult;
+            const total = (mv * mult) + solatium + assets;
+
+            document.getElementById('readout-mv').innerText = formatRupees(mv);
+            document.getElementById('readout-sol').innerText = formatRupees(solatium);
+            document.getElementById('readout-total').innerText = formatRupees(total);
+        }
+
+        // Handle Add Landowner record (Submit)
+        function handleCreateParcel(e) {
+            e.preventDefault();
+            const projectId = document.getElementById('project-selector').value;
+            if (!projectId) return;
+
+            const survey = document.getElementById('par-survey').value;
+            const owner = document.getElementById('par-owner').value;
+            const area = parseFloat(document.getElementById('par-area').value);
+            const type = document.getElementById('par-type').value;
+            const rate = parseFloat(document.getElementById('par-rate').value);
+            const mult = parseFloat(document.getElementById('par-multiplier').value);
+            const assets = parseFloat(document.getElementById('par-assets').value) || 0.0;
+
+            const mv = area * rate;
+            const solatium = mv * mult;
+            const total = (mv * mult) + solatium + assets;
+
+            const payload = {
+                survey_number: survey,
+                owner_name: owner,
+                area_acres: area,
+                land_type: type,
+                market_value: mv,
+                multiplier: mult,
+                solatium: solatium,
+                assets_value: assets,
+                total_compensation: total,
+                status: 'Valued' // Set as Valued immediately for demonstration
+            };
+
+            fetch(`/api/projects/${projectId}/parcels`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.id) {
+                    alert(`Record logged successfully for landowner: ${owner}`);
+                    document.getElementById('parcel-form').reset();
+                    document.getElementById('par-type').value = 'Agricultural';
+                    document.getElementById('par-area').value = '2.5';
+                    document.getElementById('par-rate').value = '2500000';
+                    document.getElementById('par-multiplier').value = '2.0';
+                    document.getElementById('par-assets').value = '120000';
+                    
+                    runAutoValuation();
+                    loadProjectParcels(projectId);
+                } else {
+                    alert('Failed to log parcel: ' + data.error);
+                }
+            })
+            .catch(err => alert('Failed to connect to Flask server API.'));
+        }
+
+        // Disburse compensation payment
+        function disbursePayment(parcelId) {
+            const projectId = document.getElementById('project-selector').value;
+            fetch(`/api/parcels/${parcelId}/disburse`, { method: 'POST' })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.id) {
+                        alert(`Disbursement Successful: Amount Released to ${data.owner_name}`);
+                        loadProjectParcels(projectId);
+                    } else {
+                        alert('Disbursement failed: ' + data.error);
+                    }
+                });
+        }
+
+        // Open Raise Dispute modal
+        function openRaiseDisputeModal(parcelId) {
+            document.getElementById('dispute-parcel-id').value = parcelId;
+            document.getElementById('dispute-description').value = '';
+            document.getElementById('raise-dispute-modal').classList.remove('hidden');
+        }
+
+        function closeRaiseDisputeModal() {
+            document.getElementById('raise-dispute-modal').classList.add('hidden');
+        }
+
+        // Log Objections Dispute
+        function handleRaiseDispute(e) {
+            e.preventDefault();
+            const parcelId = document.getElementById('dispute-parcel-id').value;
+            const type = document.getElementById('dispute-type').value;
+            const desc = document.getElementById('dispute-description').value;
+
+            const payload = { dispute_type: type, description: desc };
+
+            fetch(`/api/parcels/${parcelId}/dispute`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(data => {
+                closeRaiseDisputeModal();
+                if (data.dispute) {
+                    alert('Dispute Logged. Payment has been suspended for this parcel.');
+                    loadProjectParcels(document.getElementById('project-selector').value);
+                } else {
+                    alert('Failed to raise dispute: ' + data.error);
+                }
+            });
+        }
+
+        // Load Disputes list in Disputes Tab
+        function loadDisputesList() {
+            fetch('/api/disputes')
+                .then(res => res.json())
+                .then(disputes => {
+                    const tbody = document.getElementById('disputes-table-body');
+                    tbody.innerHTML = '';
+
+                    const activeDisputes = disputes.filter(d => d.status !== 'Resolved');
+                    // Update badge
+                    const badge = document.getElementById('dispute-badge');
+                    if (activeDisputes.length > 0) {
+                        badge.innerText = activeDisputes.length;
+                        badge.classList.remove('hidden');
+                    } else {
+                        badge.classList.add('hidden');
+                    }
+
+                    if (disputes.length === 0) {
+                        tbody.innerHTML = `
+                            <tr>
+                                <td colspan="8" class="px-6 py-12 text-center text-slate-500 italic">No disputes registered in system. All land acquisition records are conflict-free!</td>
+                            </tr>
+                        `;
+                        return;
+                    }
+
+                    disputes.forEach(d => {
+                        const tr = document.createElement('tr');
+                        tr.className = "hover:bg-slate-700/35 border-b border-slate-700/60";
+
+                        const date = new Date(d.created_at).toLocaleDateString();
+                        const isResolved = d.status === 'Resolved';
+                        
+                        let statusColor = "bg-rose-500/10 text-rose-400 border-rose-500/25";
+                        if (isResolved) statusColor = "bg-emerald-500/10 text-emerald-400 border-emerald-500/25";
+                        if (d.status === 'In Hearing') statusColor = "bg-yellow-500/10 text-yellow-400 border-yellow-500/25";
+
+                        const action = isResolved 
+                            ? `<span class="text-slate-500 italic text-xxs">Settled: ${d.resolution_details}</span>`
+                            : `<button onclick="openResolveDisputeModal(${d.id})" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xxs font-bold px-2 py-1 rounded transition-colors">Resolve</button>`;
+
+                        tr.innerHTML = `
+                            <td class="px-6 py-4 font-mono text-slate-400">${d.id}</td>
+                            <td class="px-6 py-4 font-semibold text-white">${d.project_name}</td>
+                            <td class="px-6 py-4 font-mono font-bold">${d.parcel_survey}</td>
+                            <td class="px-6 py-4">${d.raised_by}</td>
+                            <td class="px-6 py-4 font-bold text-rose-400">${d.dispute_type}</td>
+                            <td class="px-6 py-4 max-w-xs truncate" title="${d.description}">${d.description}</td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="text-xxs border px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${statusColor}">${d.status}</span>
+                            </td>
+                            <td class="px-6 py-4 text-center">${action}</td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                });
+        }
+
+        // Open Resolve Dispute Modal
+        function openResolveDisputeModal(disputeId) {
+            document.getElementById('resolve-dispute-id').value = disputeId;
+            document.getElementById('resolve-details').value = '';
+            document.getElementById('resolve-dispute-modal').classList.remove('hidden');
+        }
+
+        function closeResolveDisputeModal() {
+            document.getElementById('resolve-dispute-modal').classList.add('hidden');
+        }
+
+        // Resolve Dispute Submit
+        function handleResolveDispute(e) {
+            e.preventDefault();
+            const id = document.getElementById('resolve-dispute-id').value;
+            const details = document.getElementById('resolve-details').value;
+
+            fetch(`/api/disputes/${id}/resolve`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ resolution_details: details })
+            })
+            .then(res => res.json())
+            .then(data => {
+                closeResolveDisputeModal();
+                if (data.success) {
+                    alert('Dispute settled successfully. Parcel is restored for standard valuation release.');
+                    loadDisputesList();
+                } else {
+                    alert('Failed to resolve dispute: ' + data.error);
+                }
+            });
+        }
+
+        // Open New Project Modal
+        function openNewProjectModal() {
+            document.getElementById('new-proj-name').value = '';
+            document.getElementById('new-proj-agency').value = '';
+            document.getElementById('new-proj-state').value = '';
+            document.getElementById('new-proj-budget').value = '';
+            document.getElementById('new-project-modal').classList.remove('hidden');
+        }
+
+        function closeNewProjectModal() {
+            document.getElementById('new-project-modal').classList.add('hidden');
+        }
+
+        // Create Project Pipeline
+        function handleCreateProject(e) {
+            e.preventDefault();
+            const name = document.getElementById('new-proj-name').value;
+            const agency = document.getElementById('new-proj-agency').value;
+            const state = document.getElementById('new-proj-state').value;
+            const budget = parseFloat(document.getElementById('new-proj-budget').value) || 0.0;
+
+            const payload = { name, requiring_agency: agency, state, budget_cr: budget };
+
+            fetch('/api/projects', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(data => {
+                closeNewProjectModal();
+                if (data.id) {
+                    alert('Project pipeline created successfully.');
+                    loadDashboardStats();
+                } else {
+                    alert('Failed to create project: ' + data.error);
+                }
+            });
+        }
+
+        // Standalone RFCTLARR Calculator Logic
+        function runCalculator() {
+            const area = parseFloat(document.getElementById('calc-area').value) || 0.0;
+            const rate = parseFloat(document.getElementById('calc-rate').value) || 0.0;
+            const mult = parseFloat(document.getElementById('calc-multiplier').value) || 1.0;
+            const assets = parseFloat(document.getElementById('calc-assets').value) || 0.0;
+
+            const bmv = area * rate;
+            const mmv = bmv * mult;
+            const solatium = mmv; // solatium is 100% of the multiplied market value
+            const finalComp = mmv + solatium + assets;
+
+            document.getElementById('breakdown-bmv').innerText = formatRupees(bmv);
+            document.getElementById('breakdown-mmv').innerText = formatRupees(mmv);
+            document.getElementById('breakdown-sol').innerText = formatRupees(solatium);
+            document.getElementById('breakdown-assets').innerText = formatRupees(assets);
+            document.getElementById('calc-final-result').innerText = formatRupees(finalComp);
+        }
+
+        // Search Filter for parcels table
+        function filterParcelsTable() {
+            const query = document.getElementById('parcel-search-input').value.toLowerCase();
+            const rows = document.querySelectorAll('#parcels-table-body tr');
+            
+            rows.forEach(row => {
+                const owner = row.cells[1]?.innerText.toLowerCase() || '';
+                const survey = row.cells[0]?.innerText.toLowerCase() || '';
+                
+                if (owner.includes(query) || survey.includes(query)) {
+                    row.classList.remove('hidden');
+                } else {
+                    row.classList.add('hidden');
+                }
+            });
+        }
+    </script>
+</body>
+</html>
